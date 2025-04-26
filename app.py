@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
-from typing import Set
+from typing import OrderedDict as OrderedDictType
+from collections import OrderedDict
 
 import click
 from loguru import logger
@@ -26,7 +27,7 @@ class Extractor:
 
     def __init__(self, file_path: str) -> None:
         self._file_path = Path(file_path)
-        self._found_numbers: Set[str] = set()
+        self._found_numbers = OrderedDict()
 
     def _load_text(self) -> str:
         """ return text from file
@@ -41,16 +42,16 @@ class Extractor:
         except Exception:
             logger.exception('ошибка при чтении файла')
 
-    def extract(self) -> Set[str]:
+    def extract(self) -> OrderedDictType[str, None]:
         text = self._load_text()
         if not text:
             logger.warning("Пустой или нечитабельный файл")
-            return set()
+            return OrderedDict()
         logger.info(f'извлечение номеров из текста файла {self._file_path}')
         for match in self.PATTERN.finditer(text):
             formatted = self._format_number(match)
             if formatted and formatted not in self._found_numbers:
-                self._found_numbers.add(formatted)
+                self._found_numbers[formatted] = None
 
         return self._found_numbers
 
@@ -66,7 +67,7 @@ class Extractor:
             logger.exception('ошибка при форматировании номера')
 
     def _result_message(self) -> str:
-        return ('\n'.join(self._found_numbers) +
+        return ('\n'.join(self._found_numbers.keys()) +
                 '\n' + f'общее количество номеров: {len(self._found_numbers)}')
 
     def get_result_in_file(self):
@@ -75,7 +76,7 @@ class Extractor:
                 f'вывод номеров из текта файла {self._file_path} в файл')
 
             try:
-                result_dir = Path('result')
+                result_dir = Path('results')
                 result_dir.mkdir(exist_ok=True)
                 file_name = f'result_{self._file_path.name.split(".")[0]}.txt'
                 full_file_path = result_dir / file_name
