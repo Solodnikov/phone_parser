@@ -18,8 +18,8 @@ logger.add(
 
 class Extractor:
     PATTERN = re.compile(
-        r'(?:(?:\+7|8)[\s\-\(\)]*)?'
-        r'(?P<area>\d{3})[\s\-\(\)]*'
+        r'(?:(?:\+7|8)[\s\-\(]*)?'
+        r'(?P<area>\d{3})[\s\-\)]*'
         r'(?P<part1>\d{3})[\s\-\.]*'
         r'(?P<part2>\d{2})[\s\-\.]*'
         r'(?P<part3>\d{2})'
